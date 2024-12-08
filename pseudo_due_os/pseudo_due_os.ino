@@ -34,6 +34,19 @@ byte Xcursor = 2;
 //   return &top - reinterpret_cast<char*>(sbrk(0));
 // }
 
+bool checkCommandPrefix(const char* command, const char* prefix) {
+  int prefixLength = strlen(prefix);
+  if (prefixLength > strlen(command)) {
+    return false;
+  }
+  for (int i = 0; i < prefixLength; ++i) {
+    if (command[i] != prefix[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void keyPressed() {
   char key = keyboard.getKey();
   #ifdef LOG_OUTPUT_TO_SERIAL
@@ -209,8 +222,10 @@ void reset() {
       #endif
       setup(); // do not use reset, system will crash
 }
+
 void commandProcessor() {
-  if(strcmp(keybuffer , ".") != 0) { // it ignoring prefix, needs to fix
+  bool havePrefix = checkCommandPrefix(keybuffer, ".");
+  if(havePrefix == 1) {
    if (strcmp(keybuffer, ".circle") == 0) {
       #include "programs\circle.h"
    } else if (strcmp(keybuffer, ".test") == 0) {
@@ -231,8 +246,12 @@ void commandProcessor() {
     // cursor position test
     VGA.print("X: ");
     VGA.print(Xcursor);
-    VGA.println("Y:");
+    VGA.println(" Y:");
     VGA.print(Ycursor);
+  //  } else if (strcmp(keybuffer, ".asciitable") == 0) {
+  //  #include "programs\ascii_table.h"
+   } else if (strcmp(keybuffer, ".randomtest") == 0) {
+     #include "programs\random_test.h"
    } else {
      VGA.print("Command not found\n");
      return;
