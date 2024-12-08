@@ -184,7 +184,11 @@ void setup() {
   #ifdef LOG_OUTPUT_TO_SERIAL
   Serial.print("Program started\n");
   #endif
+  #ifdef USE_NTSC
+  VGA.beginNTSC();
+  #else
   VGA.beginPAL();
+  #endif
   VGA.print("p-OS\n");
   delay(200);
   VGA.print("> ");

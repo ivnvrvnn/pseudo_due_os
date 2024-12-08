@@ -1,7 +1,7 @@
 // pins configuration
 
 // Video configuraton 
-#define USE_NTSC
+#undef USE_NTSC
 
 // Build configuration
 #define ENABLE_SERIAL
