@@ -1,3 +1,4 @@
+#include <VGA.h>    
     int wak_used = 0;
     randomSeed(analogRead(A0));
     const char *names[] = {"bibarub", "binarin", "phonewave", "ivan vorvanin", "ivan otvalin", "vorvan divanin", "rostislav lastochkin", "rostislav emtrika", "baka emtrika"};

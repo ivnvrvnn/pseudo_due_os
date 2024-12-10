@@ -1,5 +1,5 @@
 // Newton Fractal demo, code taken from NewtonPAL example
-
+#include <VGA.h>
 using namespace std;
 
 const byte cmap[]={0b00000000,0b11100000,0b11100100,0b11101000,0b11101100,0b11110000,0b11110100,0b11111000,0b11111100,
