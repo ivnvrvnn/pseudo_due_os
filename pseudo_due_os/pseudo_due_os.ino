@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "config.h"
-#include "prglist.h"
 
 #define MAX_COMMAND_LENGTH 32
 #define MAX_ARGUMENTS 8
@@ -44,20 +43,45 @@ typedef struct Command {
   void (*handler)(char**);
 } Command;
 
-void reset(char** args);
-void circle(char** args);
+void reset(char** args) {
+      #ifdef LOG_OUTPUT_TO_SERIAL
+      Serial.println("RESETTING");
+      #endif
+      setup(); // do not use reset, system will crash
+}
 
-//#include "programs\newton_demo.h"
+void circle(char** args) {
+ #include "programs\circle.h"
+}
+
+void argtest(char** args) {
+ #include "programs\argtest.h"
+}
+
+void test(char** args) {
+ #include "programs\test.h"
+}
+
+void newtondemo(char** args) {
+ #include "programs\newton_demo.h"
+}
+
+void randomtest(char** args) {
+ #include "programs\random_test.h"
+}
+
+void curtest(char** args) {
+ #include "programs\curtest.h"
+}
 
 const Command commands[] = {
   {".circle", &circle},
-//{"test", &test},
+  {".test", &test},
   {".reset", &reset},
-//{"newton_demo", &newtonDemo},
-//{"elt", &enterLockTest},
-//{"curtest", &curTest},
-//{"randomtest", &randomTest},
-//{".argtest", &argtest}
+  {".newton_demo", &newtondemo},
+  {".curtest", &curtest},
+  {".randomtest", &randomtest},
+  {".argtest", &argtest}
 };
 
 size_t numCommands = sizeof(commands) / sizeof(Command);
@@ -276,40 +300,6 @@ void loop() {
   // Process USB tasks
   usb.Task();
 //cursorBlink();
-}
-
-void reset(char** args) {
-      #ifdef LOG_OUTPUT_TO_SERIAL
-      Serial.println("RESETTING");
-      #endif
-      setup(); // do not use reset, system will crash
-}
-
-void circle(char** args) {
-  if (args[0] == NULL || strlen(args[0]) == 0) {
-    VGA.println("Usage: .circle <radius>");
-    return;
-  }
-
-  int radius = atoi(args[0]);
-  if (radius <= 0) {
-    VGA.println("Invalid radius");
-    return;
-  }
-
-  if (radius > 255) {
-    VGA.println("Radius too large");
-    return;
-  }
-
-
-  char strRadius[16];
-  snprintf(strRadius, sizeof(strRadius), "%d", radius);
-  
-  VGA.println("Drawing a circle with radius: ");
-  VGA.println(strRadius);
-  VGA.drawCircle(32, 32, radius, 1);
-  VGA.fillCircle(32, 32, radius, 1);
 }
 
 // idk
