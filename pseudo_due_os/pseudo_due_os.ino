@@ -4,8 +4,13 @@
 #include <KeyboardController.h>
 #include <VGA.h>
 #include <complex>
+#include <string.h>
 
 #include "config.h"
+#include "prglist.h"
+
+#define MAX_COMMAND_LENGTH 32
+#define MAX_ARGUMENTS 8
 
 USBHost usb;
 KeyboardController keyboard(usb);
@@ -33,6 +38,63 @@ byte Xcursor = 2;
 //   char top;
 //   return &top - reinterpret_cast<char*>(sbrk(0));
 // }
+
+typedef struct Command {
+  const char* name;
+  void (*handler)(char**);
+} Command;
+
+void reset(char** args);
+void circle(char** args);
+
+//#include "programs\newton_demo.h"
+
+const Command commands[] = {
+  {".circle", &circle},
+//{"test", &test},
+  {".reset", &reset},
+//{"newton_demo", &newtonDemo},
+//{"elt", &enterLockTest},
+//{"curtest", &curTest},
+//{"randomtest", &randomTest},
+//{".argtest", &argtest}
+};
+
+size_t numCommands = sizeof(commands) / sizeof(Command);
+
+void processArguments(char** argv, size_t argc) {
+  for (size_t i = 0; i < numCommands; ++i) {
+    if (strcmp(argv[0], commands[i].name) == 0) {
+      commands[i].handler(argv + 1);
+      return;
+    }
+  }
+  VGA.print("Command not found: ");
+  VGA.println(argv[0]);
+}
+
+void commandProcessor() {
+  char buffer[MAX_COMMAND_LENGTH];
+  strcpy(buffer, keybuffer);
+
+  char* token = strtok(buffer, " ");
+  while (token != NULL) {
+    char* argv[MAX_ARGUMENTS];
+    size_t argc = 0;
+    
+    argv[argc++] = token;
+    while ((token = strtok(NULL, " ")) != NULL && argc < MAX_ARGUMENTS) {
+      argv[argc++] = token;
+    }
+    
+    processArguments(argv, argc);
+    
+    token = strtok(NULL, ";");
+  }
+
+  keybuffer[0] = '\0';
+  keypointer = 0;
+}
 
 bool checkCommandPrefix(const char* command, const char* prefix) {
   int prefixLength = strlen(prefix);
@@ -216,51 +278,41 @@ void loop() {
 //cursorBlink();
 }
 
-void reset() {
+void reset(char** args) {
       #ifdef LOG_OUTPUT_TO_SERIAL
       Serial.println("RESETTING");
       #endif
       setup(); // do not use reset, system will crash
 }
 
-void commandProcessor() {
-  bool havePrefix = checkCommandPrefix(keybuffer, ".");
-  if(havePrefix == 1) {
-   if (strcmp(keybuffer, ".circle") == 0) {
-      #include "programs\circle.h"
-   } else if (strcmp(keybuffer, ".test") == 0) {
-      #include "programs\test.h" 
-   } else if (strcmp(keybuffer, ".reset") == 0) {
-      reset();
-   } else if (strcmp(keybuffer, ".newton_demo") == 0) {
-     #include "programs\newton_demo.h"
-     // 1. cpu is halting if i use this 
-  //  } else if (strcmp(keybuffer, ".free") == 0) {
-  //    VGA.print(F("- SRAM left: "));
-  //    VGA.println(freeRam());
-   } else if (strcmp(keybuffer, ".elt") == 0) {
-     #include "programs\enter_lock_test.h"
-  //  } else if (strcmp(keybuffer, ".cleargfx") == 0) {
-  //   VGA.clear();
-   } else if (strcmp(keybuffer, ".curtest") == 0) {
-    // cursor position test
-    VGA.print("X: ");
-    VGA.print(Xcursor);
-    VGA.println(" Y:");
-    VGA.print(Ycursor);
-  //  } else if (strcmp(keybuffer, ".asciitable") == 0) {
-  //  #include "programs\ascii_table.h"
-   } else if (strcmp(keybuffer, ".randomtest") == 0) {
-     #include "programs\random_test.h"
-   } else {
-     VGA.print("Command not found\n");
-     return;
-   }
-  } else 
-  return;
-  keybuffer[0] = '\0';
-  keypointer = 0;
+void circle(char** args) {
+  if (args[0] == NULL || strlen(args[0]) == 0) {
+    VGA.println("Usage: .circle <radius>");
+    return;
+  }
+
+  int radius = atoi(args[0]);
+  if (radius <= 0) {
+    VGA.println("Invalid radius");
+    return;
+  }
+
+  if (radius > 255) {
+    VGA.println("Radius too large");
+    return;
+  }
+
+
+  char strRadius[16];
+  snprintf(strRadius, sizeof(strRadius), "%d", radius);
+  
+  VGA.println("Drawing a circle with radius: ");
+  VGA.println(strRadius);
+  VGA.drawCircle(32, 32, radius, 1);
+  VGA.fillCircle(32, 32, radius, 1);
 }
+
+// idk
 
 // void cursorGet(char XY) {
 //   if (XY == "X") {
