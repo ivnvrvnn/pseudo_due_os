@@ -18,5 +18,5 @@ char strNumber[16];
 snprintf(strNumber, sizeof(strNumber), "%d", number);
 
 VGA.print("You entered: ");
-VGA.print(args);
+VGA.print(strNumber);
 VGA.println();
