@@ -14,8 +14,10 @@
 USBHost usb;
 KeyboardController keyboard(usb);
 
-bool KEY_ENTER_LOCKED;
 bool NEW_LINE;
+bool restart;
+
+void (*resetFunc)(void) = 0;
 
 // keybuffer
 char keybuffer[KEYBUFFER_SIZE];
@@ -30,24 +32,15 @@ uint8_t keypointer;
 byte Ycursor = 3;
 byte Xcursor = 2;
 
-// 1. cpu is halting if i use this 
-// extern "C" char* sbrk(int incr);
-
-// int freeRam() {
-//   char top;
-//   return &top - reinterpret_cast<char*>(sbrk(0));
-// }
-
 typedef struct Command {
   const char* name;
   void (*handler)(char**);
 } Command;
 
 void reset(char** args) {
-      #ifdef LOG_OUTPUT_TO_SERIAL
-      Serial.println("RESETTING");
-      #endif
-      setup(); // do not use reset, system will crash
+  VGA.end();
+  restart = 1;
+  resetFunc();
 }
 
 void circle(char** args) {
@@ -120,19 +113,6 @@ void commandProcessor() {
   keypointer = 0;
 }
 
-bool checkCommandPrefix(const char* command, const char* prefix) {
-  int prefixLength = strlen(prefix);
-  if (prefixLength > strlen(command)) {
-    return false;
-  }
-  for (int i = 0; i < prefixLength; ++i) {
-    if (command[i] != prefix[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void keyPressed() {
   char key = keyboard.getKey();
   #ifdef LOG_OUTPUT_TO_SERIAL
@@ -144,8 +124,6 @@ void keyPressed() {
   uint8_t oemCode = keyboard.getOemKey();
   printKey(key, oemCode, keyboard.getModifiers());
   if (oemCode == OEM_ENTER) { /* enter */
-   if (KEY_ENTER_LOCKED == 1){ // buffer disabled
-    } else {
     VGA.write('\n');
     commandProcessor();
     if (keypointer != 0) {
@@ -154,16 +132,12 @@ void keyPressed() {
       Serial.println(keybuffer);
       #endif
       keypointer = 0;
-      // needs to be rewritten
-//    char lastcmd[LASTCMD_SIZE] = keybuffer;
       keybuffer[0] = '\0';
       NEW_LINE = 1;
       }
       NEW_LINE = 0;
       VGA.print("> ");
       Xcursor = 2;
-    }
-    return;
   }
   // bad backspace implementation
   if (oemCode == OEM_BACKSPACE) {
@@ -184,25 +158,7 @@ void keyPressed() {
     keybuffer[0] = '\0';
     keypointer = 0;
   }
-  if (KEY_ENTER_LOCKED == 1){ // buffer reset disabled
-    keygoreargbuffer[keypointer] = key;
-    keygoreargbuffer[++keypointer] = '\0';
-    #ifdef LOG_OUTPUT_TO_SERIAL
-    Serial.println(keygoreargbuffer);
-    #endif
-  } else {
-    keybuffer[keypointer] = key;
-    keybuffer[++keypointer] = '\0';
-    #ifdef LOG_OUTPUT_TO_SERIAL
-    Serial.println(keybuffer);
-    #endif
-  }
 }
-
-//void keyReleased() {
-//  Serial.print("Released: ");
-//  printKey();
-//}
 
 void printKey(char key, uint8_t oemCode, uint8_t mod) {
   #ifdef LOG_OUTPUT_TO_SERIAL
@@ -268,7 +224,6 @@ void printKey(char key, uint8_t oemCode, uint8_t mod) {
     return;
   };
 
- // using VGA.print instead of VGA.write
   Xcursor = Xcursor + 1;
   VGA.print(key);
   Serial.println(key);
@@ -293,30 +248,20 @@ void setup() {
   VGA.print("> ");
 }
 
-// bool ps2test_started = 0; unused code
-bool newton_started = 0;
-
 void loop() {
+ if (restart == 1) {
+  keybuffer[0] = '\0';
+  keypointer = 0;
+  #ifdef USE_NTSC
+  VGA.beginNTSC();
+  #else
+  VGA.beginPAL();
+  #endif
+  VGA.print("p-OS\n");
+  delay(200);
+  VGA.print("> ");
+   restart = 0;
+  }
   // Process USB tasks
   usb.Task();
-//cursorBlink();
 }
-
-// idk
-
-// void cursorGet(char XY) {
-//   if (XY == "X") {
-
-//    return curX
-//   }
-// }
-
-// don't use this, it doesn't work
-
-// void cursorBlink() {
-//   delay(cursorBlinkDelay);
-//   VGA.print("_");
-//   Xcursor = Xcursor - 1;
-//   VGA.moveCursor(Xcursor, Ycursor);
-//   VGA.print(" ");
-// }
