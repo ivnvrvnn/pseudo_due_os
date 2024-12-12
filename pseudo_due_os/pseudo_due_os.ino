@@ -30,14 +30,6 @@ uint8_t keypointer;
 byte Ycursor = 3;
 byte Xcursor = 2;
 
-// 1. cpu is halting if i use this 
-// extern "C" char* sbrk(int incr);
-
-// int freeRam() {
-//   char top;
-//   return &top - reinterpret_cast<char*>(sbrk(0));
-// }
-
 typedef struct Command {
   const char* name;
   void (*handler)(char**);
@@ -120,19 +112,6 @@ void commandProcessor() {
   keypointer = 0;
 }
 
-bool checkCommandPrefix(const char* command, const char* prefix) {
-  int prefixLength = strlen(prefix);
-  if (prefixLength > strlen(command)) {
-    return false;
-  }
-  for (int i = 0; i < prefixLength; ++i) {
-    if (command[i] != prefix[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void keyPressed() {
   char key = keyboard.getKey();
   #ifdef LOG_OUTPUT_TO_SERIAL
@@ -199,11 +178,6 @@ void keyPressed() {
   }
 }
 
-//void keyReleased() {
-//  Serial.print("Released: ");
-//  printKey();
-//}
-
 void printKey(char key, uint8_t oemCode, uint8_t mod) {
   #ifdef LOG_OUTPUT_TO_SERIAL
   Serial.print(" key:");
@@ -268,7 +242,6 @@ void printKey(char key, uint8_t oemCode, uint8_t mod) {
     return;
   };
 
- // using VGA.print instead of VGA.write
   Xcursor = Xcursor + 1;
   VGA.print(key);
   Serial.println(key);
@@ -293,30 +266,7 @@ void setup() {
   VGA.print("> ");
 }
 
-// bool ps2test_started = 0; unused code
-bool newton_started = 0;
-
 void loop() {
   // Process USB tasks
   usb.Task();
-//cursorBlink();
 }
-
-// idk
-
-// void cursorGet(char XY) {
-//   if (XY == "X") {
-
-//    return curX
-//   }
-// }
-
-// don't use this, it doesn't work
-
-// void cursorBlink() {
-//   delay(cursorBlinkDelay);
-//   VGA.print("_");
-//   Xcursor = Xcursor - 1;
-//   VGA.moveCursor(Xcursor, Ycursor);
-//   VGA.print(" ");
-// }
