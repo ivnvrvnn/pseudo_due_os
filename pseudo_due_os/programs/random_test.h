@@ -1,4 +1,4 @@
-#include <VGA.h>    
+void randomtest(char** args) {
     int wak_used = 0;
     randomSeed(analogRead(A0));
     const char *names[] = {"bibarub", "binarin", "phonewave", "ivan vorvanin", "ivan otvalin", "vorvan divanin", "rostislav lastochkin", "rostislav emtrika", "baka emtrika"};
@@ -14,3 +14,4 @@
     wak_used = 1;
     VGA.print(names[random(count)]);
     VGA.print(" is a khamlo\n"); };
+}

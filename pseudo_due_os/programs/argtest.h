@@ -1,3 +1,4 @@
+void argtest(char** args) {  
   if (args[0] == NULL || strlen(args[0]) == 0) {
     VGA.println("Usage: .argtest <number from 1 to 255>");
     return;
@@ -20,3 +21,4 @@ snprintf(strNumber, sizeof(strNumber), "%d", number);
 VGA.print("You entered: ");
 VGA.print(strNumber);
 VGA.println();
+}

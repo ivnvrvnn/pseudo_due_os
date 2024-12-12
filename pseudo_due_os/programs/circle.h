@@ -1,3 +1,4 @@
+void circle(char** args) {  
   if (args[0] == NULL || strlen(args[0]) == 0) {
     VGA.println("Usage: .circle <radius>");
     return;
@@ -22,3 +23,4 @@
   VGA.println(strRadius);
   VGA.drawCircle(32, 32, radius, 1);
   VGA.fillCircle(32, 32, radius, 1);
+}

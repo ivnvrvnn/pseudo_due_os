@@ -1,4 +1,5 @@
 // Newton Fractal demo, code taken from NewtonPAL example
+void newtondemo(char** args) {
 #include <VGA.h>
 using namespace std;
 
@@ -28,3 +29,4 @@ VGA.println("x^3 - 1 = 0");
 }
 
 for(;;);
+}

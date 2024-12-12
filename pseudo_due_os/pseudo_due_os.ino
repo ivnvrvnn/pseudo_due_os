@@ -50,29 +50,14 @@ void reset(char** args) {
       setup(); // do not use reset, system will crash
 }
 
-void circle(char** args) {
+
  #include "programs\circle.h"
-}
-
-void argtest(char** args) {
  #include "programs\argtest.h"
-}
-
-void test(char** args) {
  #include "programs\test.h"
-}
-
-void newtondemo(char** args) {
  #include "programs\newton_demo.h"
-}
-
-void randomtest(char** args) {
  #include "programs\random_test.h"
-}
-
-void curtest(char** args) {
  #include "programs\curtest.h"
-}
+
 
 const Command commands[] = {
   {".circle", &circle},
