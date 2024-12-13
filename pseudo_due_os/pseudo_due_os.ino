@@ -103,7 +103,7 @@ void commandProcessor() {
     return;
   }
   strcpy(argv[0], token);
-  while (token = strtok(NULL, " "), token != NULL) {
+  while (token = strtok(NULL, " ")) {
     if (strlen(token) > MAX_COMMAND_LENGTH-1) {
       LOGSERIAL('\'');
       LOGSERIAL(token);
@@ -111,7 +111,7 @@ void commandProcessor() {
       VGA.print("the argument is too long.\n");
       return;
     }
-    strcpy(argv[++argc], token);
+    strcpy(argv[argc++], token);
   }
   processArguments((char**)argv, argc);
 }
