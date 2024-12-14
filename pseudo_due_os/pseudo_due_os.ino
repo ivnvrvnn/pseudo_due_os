@@ -75,7 +75,7 @@ const Command commands[] = {
 size_t numCommands = sizeof(commands) / sizeof(Command);
 
 void processArguments(char** argv, int argc) {
-  if (argc == 0) {
+  if (argc < 1) {
     return;
   }
   for (size_t i = 0; i < numCommands; ++i) {
@@ -92,7 +92,7 @@ void commandProcessor() {
   if (keybuffer[0] != '.') {
     return;
   }
-  char argv[MAX_ARGUMENTS][MAX_COMMAND_LENGTH];
+  char argarr[MAX_ARGUMENTS][MAX_COMMAND_LENGTH];
   int argc = 1;
   char* token = strtok(keybuffer+1, " ");
   if (strlen(token) > MAX_COMMAND_LENGTH-1) {
@@ -102,8 +102,13 @@ void commandProcessor() {
     VGA.print("the command is too long.\n");
     return;
   }
-  strcpy(argv[0], token);
+  strcpy(argarr[0], token);
   while (token = strtok(NULL, " ")) {
+    if (argc == MAX_ARGUMENTS) {
+      LOGSERIAL("too many arguments");
+      VGA.print("too many arguments.\n");
+      return;
+    }
     if (strlen(token) > MAX_COMMAND_LENGTH-1) {
       LOGSERIAL('\'');
       LOGSERIAL(token);
@@ -111,9 +116,14 @@ void commandProcessor() {
       VGA.print("the argument is too long.\n");
       return;
     }
-    strcpy(argv[argc++], token);
+    strcpy(argarr[argc++], token);
   }
-  processArguments((char**)argv, argc);
+  char *argv[argc];
+  for (unsigned i = 0; i < argc; ++i) {
+    argv[i] = argarr[i];
+  }
+  processArguments(argv, argc);
+  VGA.print('\n');
 }
 
 void keyPressed() {
@@ -140,7 +150,7 @@ void keyPressed() {
       keypointer = 0;
       keybuffer[0] = '\0';
     }
-    VGA.print("\n> ");
+    VGA.print("> ");
     return;
   }
   if (oemCode == OEM_BACKSPACE) { /* backspace hack */
