@@ -7,7 +7,6 @@
 
 #include "config.h"
 
-#define MAX_COMMAND_LENGTH 32
 #define MAX_ARGUMENTS 8
 
 #define OEM_ENTER 40
@@ -92,35 +91,20 @@ void commandProcessor() {
   if (keybuffer[0] != '.') {
     return;
   }
-  char argarr[MAX_ARGUMENTS][MAX_COMMAND_LENGTH];
+  char *argv[MAX_ARGUMENTS];
   int argc = 1;
   char* token = strtok(keybuffer+1, " ");
-  if (strlen(token) > MAX_COMMAND_LENGTH-1) {
-    LOGSERIAL('\'');
-    LOGSERIAL(token);
-    LOGSERIAL("' is too long\n");
-    VGA.print("the command is too long.\n");
+  if (token == NULL) {
     return;
   }
-  strcpy(argarr[0], token);
+  argv[0] = token;
   while (token = strtok(NULL, " ")) {
     if (argc == MAX_ARGUMENTS) {
       LOGSERIAL("too many arguments");
       VGA.print("too many arguments.\n");
       return;
     }
-    if (strlen(token) > MAX_COMMAND_LENGTH-1) {
-      LOGSERIAL('\'');
-      LOGSERIAL(token);
-      LOGSERIAL("' is too long\n");
-      VGA.print("the argument is too long.\n");
-      return;
-    }
-    strcpy(argarr[argc++], token);
-  }
-  char *argv[argc];
-  for (unsigned i = 0; i < argc; ++i) {
-    argv[i] = argarr[i];
+    argv[argc++] = token;
   }
   processArguments(argv, argc);
   VGA.print('\n');
